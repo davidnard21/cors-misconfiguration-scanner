@@ -1,0 +1,126 @@
+================================================================
+CORS MISCONFIGURATION SCANNER -- PROJECT OUTLINE
+================================================================
+
+WHAT IT DOES
+------------
+Sends HTTP requests to a target URL with spoofed Origin headers
+and analyzes what the server reflects back -- detecting overly
+permissive CORS policies that could allow a malicious website to
+steal data from authenticated users.
+
+
+A QUICK EXPLANATION OF CORS
+----------------------------
+When your browser makes a request from one website to another,
+it attaches an Origin header saying where the request came from.
+The server then decides whether to allow it by responding with an
+Access-Control-Allow-Origin header. A misconfigured server might
+blindly reflect back whatever origin it receives -- meaning any
+malicious site could pretend to be trusted.
+
+
+INPUTS
+------
+- A target URL typed in by the user
+- The prompt must explicitly instruct the user to include https://
+- If the URL does not start with http:// or https://, throw an
+  error and ask again using a while True loop with a break
+- Planned later: file-based input for bulk URLs
+- Planned later: automatic https:// detection and prefix insertion
+
+
+CORE LOGIC FLOW
+---------------
+1. COLLECT AND VALIDATE INPUT
+   - Use a get_target_url() function in main.py
+   - Loop until a valid URL is entered, then return it to main()
+
+2. BUILD A LIST OF TEST ORIGINS TO SPOOF
+   - A totally random domain         (https://evil.com)
+   - A subdomain of the target       (https://evil.target.com)
+   - The target with a prefix        (https://target.com.evil.com)
+   - A null origin                   (null)
+   - HTTP version of an HTTPS target (http://target.com)
+
+3. FOR EACH TEST ORIGIN
+   - Send a GET request with that value in the Origin header
+
+4. CHECK THE RESPONSE HEADERS FOR:
+   - Access-Control-Allow-Origin     (what origin did server allow?)
+   - Access-Control-Allow-Credentials (does it allow cookies?)
+
+5. CLASSIFY THE RESULT FOR EACH TEST
+   - Server reflected spoofed origin exactly  --> Vulnerable
+   - Server returned wildcard *               --> Misconfigured, less severe
+   - Server returned null and you sent null   --> Potentially exploitable
+   - Server returned its own domain only      --> Correctly configured
+   - No CORS headers at all                   --> Report it
+
+6. FLAG DANGEROUS COMBINATIONS
+   - Worst case: server reflects spoofed origin AND allows credentials
+   - This means a malicious site could make authenticated requests
+     and read the response
+
+7. PRINT A REPORT
+   - Summarize findings for each test origin (see Output section)
+
+
+OUTPUT
+------
+A clean terminal report. Example:
+
+  Target: https://example.com
+
+  Origin Tested: https://evil.com
+    Access-Control-Allow-Origin:      FAIL - Reflects spoofed origin
+    Access-Control-Allow-Credentials: FAIL - True
+    Verdict: HIGH RISK -- authenticated cross-origin requests possible
+
+  Origin Tested: null
+    Access-Control-Allow-Origin:      WARN - Returns null
+    Access-Control-Allow-Credentials: PASS - Not set
+    Verdict: LOW RISK -- limited exploitability
+
+
+ERROR HANDLING
+--------------
+- Invalid URL format (no https:// prefix)
+    --> Print an error and re-prompt in a loop
+
+- Site is unreachable or URL is malformed
+    --> Catch the error and report it clearly
+
+- Site responds but has no CORS headers
+    --> Valid result, report it as-is
+
+- Request times out
+    --> Skip that test and note it in the output
+
+
+LIBRARIES NEEDED
+----------------
+- requests  (only external library required)
+
+
+FILE STRUCTURE
+--------------
+- scanner.py    Main script, handles input and coordinates everything
+- tester.py     Sends a single request with a spoofed origin,
+                returns the result
+- reporter.py   Formats and prints the final report
+
+
+STRETCH GOALS (once the basics work)
+-------------------------------------
+- Automatic https:// detection and prefix insertion
+- File-based input for testing multiple URLs in bulk
+- Test multiple endpoints on the same domain from a list
+- Check preflight requests (OPTIONS request + response analysis)
+- Add a severity scoring system across all findings
+- Export results to a file
+- Chain with Cookie Profiler for a combined report
+
+================================================================
+END OF DOCUMENT
+================================================================
