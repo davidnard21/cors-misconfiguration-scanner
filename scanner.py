@@ -51,12 +51,41 @@ def send_request(url):
         
     # anaylze the response headers for CORS misconfig
     
-    corsHeader = functionResponse.headers.get("Access-Control-Allow-Origin")
-    corsHeaderCreds = functionResponse.headers.get("Access-Control-Allow-Credentials")
+    allowOrigin = functionResponse.headers.get("Access-Control-Allow-Origin")
+    allowCreds = functionResponse.headers.get("Access-Control-Allow-Credentials")
     
     print(functionResponse.headers) # testing print (remove later)
+    print(allowOrigin) # testing print (remove later)
+    print(allowCreds) # testing print (remove later)
     
-    # for testing right now sort through header before migrating to analysis function
+   # return the relevant headers for analysis function
+    allowOrigin, allowCreds
+    
+def analyze_repsonse(url, allowOrigin, allowCreds):
+    # analyze the response headers for CORS misconfigurations
+    # take the repsonse from the previous function and analyze it here
+    
+    # setup variables for analysis
+    # the scoring system will be like golf, the lower the better, with 0 being the best
+    allowOriginScore = 0
+    allowCredsScore = 0
+    
+    # allowOrigin
+    if allowOrigin is None:
+        print("No CORS origin headers found in response")
+    
+    
+    # allowCreds
+    if allowCreds is None:
+        print("No CORS credentials headers found in response")
+        
+    
+    # anaylze the CORS
+    
+    
+    # grades based on analysis
+    
+    # return everything to pass into the print function for final report
     
     
 def main():
@@ -70,11 +99,17 @@ def main():
     check_user_url(tarURL)
     
     # send request
-    send_request(tarURL)
+    corsHeader, corsHeaderCreds = send_request(tarURL)
     
     # analyze response
+    analyze_repsonse(tarURL, corsHeader, corsHeaderCreds)
     
-    # grade the configuration
+    # when we recieve the response from the GET request, it comes in the form of a dictionary
+    # each key in the dictionary has a "definition" linked to it, I am not sure that is the correct term
+    # 1. Ensure the return includes CORS entries
+    # 2. Read the definition linked to the CORS key
+    # 3. Grade the definition based on predeterminded scoring
+    
     
     # report results
 
