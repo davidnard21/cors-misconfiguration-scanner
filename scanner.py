@@ -31,7 +31,7 @@ def check_user_url(url):
     print("URL is valid") # testing print (remove later)
     
 def send_request(url):
-    spacer = "=========="
+    spacer = "=============================="
     # send a request to the url and get the response
     # the information returned from the reponse will be used to analyze the CORS config
     
@@ -57,42 +57,32 @@ def send_request(url):
     # create headers dictionary to avoid passing a million vars for each function
 
     corsHeaders = {
-        "allowOrigin": functionResponse.headers.get("Access-Control-Allow-Origin", "N/A")
-        "allowCreds": functionResponse.headers.get("Access-Control-Allow-Credentials", "N/A")
-        "allowMethods": functionResponse.headers.get("Access-Control-Allow-Methods", "N/A")
-        "allowControl": functionResponse.headers.get("Access-Control-Allow-Headers", "N/A")
-        "exposeHeaders": functionResponse.headers.get("Access-Control-Expose-Headers", "N/A")
+        "allowOrigin": functionResponse.headers.get("Access-Control-Allow-Origin", "N/A"),
+        "allowCreds": functionResponse.headers.get("Access-Control-Allow-Credentials", "N/A"),
+        "allowMethods": functionResponse.headers.get("Access-Control-Allow-Methods", "N/A"),
+        "allowControl": functionResponse.headers.get("Access-Control-Allow-Headers", "N/A"),
+        "exposeHeaders": functionResponse.headers.get("Access-Control-Expose-Headers", "N/A"),
         "controlMaxAge": functionResponse.headers.get("Access-Control-Max-Age", "N/A")
     }
-
-    allowOrigin = functionResponse.headers.get("Access-Control-Allow-Origin", "N/A")
-    allowCreds = functionResponse.headers.get("Access-Control-Allow-Credentials", "N/A")
-    allowMethods = functionResponse.headers.get("Access-Control-Allow-Methods", "N/A")
-    allowControl = functionResponse.headers.get("Access-Control-Allow-Headers", "N/A")
-    exposeHeaders = functionResponse.headers.get("Access-Control-Expose-Headers", "N/A")
-    controlMaxAge = functionResponse.headers.get("Access-Control-Max-Age", "N/A")
-
-    # note to self
-    # impelment dictionary and replace vars
     
     print(spacer)
     print(functionResponse.headers) # testing print (remove later)
-    print("Origin : " + str(allowOrigin))
-    print("Credentials : " + str(allowCreds))
-    print("Methods : " + str(allowMethods))
+    print("Origin : " + corsHeaders["allowOrigin"])
+    print("Credentials : " + corsHeaders["allowCreds"])
+    print("Methods : " + corsHeaders["allowMethods"])
 
     # return the relevant headers for analysis function
-    return allowOrigin, allowCreds, allowMethods, allowControl, exposeHeaders, controlMaxAge
+    return corsHeaders
     
 def analyze_repsonse(url, allowOrigin, allowCreds):
     # analyze the response headers for CORS misconfigurations
     # take the repsonse from the previous function and analyze it here
    
-    # 
-    
     # return everything to pass into the print function for final report
+
+    pass
     
-    
+
 def main():
     print("CORS Misconfiguration Scanner")
     
@@ -104,10 +94,10 @@ def main():
     check_user_url(tarURL)
     
     # send request
-    allowOrigin, allowCreds, allowMethods, allowControl, allowHeaders, exposeHeaders, controlMaxAge = send_request(tarURL)
+    corsHeaders = send_request(tarURL)
     
     # analyze response
-    analyze_repsonse(tarURL, allowOrigin, allowCreds,)
+    analyze_repsonse(tarURL, corsHeaders["allowOrigin"], corsHeaders["allowCreds"],)
     
     # when we recieve the response from the GET request, it comes in the form of a dictionary
     # each key in the dictionary has a "definition" linked to it, I am not sure that is the correct term
