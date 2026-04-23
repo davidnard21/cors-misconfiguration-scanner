@@ -8,11 +8,17 @@ from urllib.parse import urlparse
 
 # utility functions
 
-def spacer():
-    print("=" * 59)
+def littleSpacer():
+    print("-" * 60)
+
+def bigSpacer():
+    print("=" * 60)
     
 def title():
-    print("=" * 20 + "CORS HEADER SCANNER" + "=" * 20)
+    print("=" * 20 + "CORS HEADER SCANNER" + "=" * 21)
+    
+def results():
+    print("=" * 26 + "RESULTS" + "=" * 27)
 
 # main functionality functions
 
@@ -72,7 +78,7 @@ def send_request(url, corsHeaders):
     corsHeaders["exposeHeaders"] = functionResponse.headers.get("Access-Control-Expose-Headers", "N/A")
     corsHeaders["controlMaxAge"] = functionResponse.headers.get("Access-Control-Max-Age", "N/A")
     
-    spacer()
+    bigSpacer()
     print(functionResponse.headers) # testing print (remove later)
     # print("Origin : " + corsHeaders["allowOrigin"])
     # print("Credentials : " + corsHeaders["allowCreds"])
@@ -81,13 +87,13 @@ def send_request(url, corsHeaders):
     # return the relevant headers for analysis function
     return corsHeaders
     
-def analyze_repsonse(corsHeaders):
+def analyze_repsonse(tarURL, corsHeaders):
     # analyze the response headers for CORS misconfigurations
     # take the repsonse from the previous function and analyze it here
     
-    spacer()
-
-    # print the juice
+    # print all the stats for the user
+    
+    results()
     
     print(f"{'Allow Origin':<25}: " + corsHeaders["allowOrigin"])
     print(f"{'Allow Credentials':<25}: " + corsHeaders["allowCreds"])
@@ -95,16 +101,61 @@ def analyze_repsonse(corsHeaders):
     print(f"{'Allow Control':<25}: " + corsHeaders["allowControl"])
     print(f"{'Expose Headers':<25}: " + corsHeaders["exposeHeaders"])
     print(f"{'Control Max Age':<25}: " + corsHeaders["controlMaxAge"])
+    
+    # print the juice
+    # make sure they know about the deadly combos
+    
+    if corsHeaders["allowOrigin"] == "http://evil.com" and corsHeaders["allowCreds"] == "true":
+        littleSpacer()
+        print(f"{'Allow Origin':<25}: " + corsHeaders["allowOrigin"])
+        print(f"{'Allow Credentials':<25}: " + corsHeaders["allowCreds"])
+        print(f"{'Verdict':<25}: " + "CRITICAL [!!!]")
+    if corsHeaders["allowOrigin"] == "null" and corsHeaders["allowCreds"] == "true":
+        littleSpacer()
+        print(f"{'Allow Origin':<25}: " + corsHeaders["allowOrigin"])
+        print(f"{'Allow Credentials':<25}: " + corsHeaders["allowCreds"])
+        print(f"{'Verdict':<25}: " + "HIGH [!!]")
+    if corsHeaders["allowOrigin"] == "*" and corsHeaders["allowCreds"] == "true":
+        littleSpacer()
+        print(f"{'Allow Origin':<25}: " + corsHeaders["allowOrigin"])
+        print(f"{'Allow Credentials':<25}: " + corsHeaders["allowCreds"])
+        print(f"{'Verdict':<25}: " + "MEDIUM [!]")
+    if corsHeaders["allowOrigin"] == "http://evil.com" and corsHeaders["allowCreds"] == "false":
+        littleSpacer()
+        print(f"{'Allow Origin':<25}: " + corsHeaders["allowOrigin"])
+        print(f"{'Allow Credentials':<25}: " + corsHeaders["allowCreds"])
+        print(f"{'Verdict':<25}: " + "MEDIUM [!]")
+    if corsHeaders["allowOrigin"] == "*" and corsHeaders["allowCreds"] == "false":
+        littleSpacer()
+        print(f"{'Allow Origin':<25}: " + corsHeaders["allowOrigin"])
+        print(f"{'Allow Credentials':<25}: " + corsHeaders["allowCreds"])
+        print(f"{'Verdict':<25}: " + "LOW")
+    if corsHeaders["allowOrigin"] == "null" and corsHeaders["allowCreds"] == "false":
+        littleSpacer()
+        print(f"{'Allow Origin':<25}: " + corsHeaders["allowOrigin"])
+        print(f"{'Allow Credentials':<25}: " + corsHeaders["allowCreds"])
+        print(f"{'Verdict':<25}: " + "LOW")
+    if corsHeaders["allowOrigin"] == tarURL and corsHeaders["allowCreds"] == "true":
+        littleSpacer()
+        print(f"{'Allow Origin':<25}: " + corsHeaders["allowOrigin"])
+        print(f"{'Allow Credentials':<25}: " + corsHeaders["allowCreds"])
+        print(f"{'Verdict':<25}: " + "SAFE")
+    if corsHeaders["allowOrigin"] == "N/A" and corsHeaders["allowCreds"] == "N/A":
+        littleSpacer()
+        print(f"{'Allow Origin':<25}: " + corsHeaders["allowOrigin"])
+        print(f"{'Allow Credentials':<25}: " + corsHeaders["allowCreds"])
+        print(f"{'Verdict':<25}: " + "SAFE")
 
 def main():
     # define main dictionary to handle lons of variables
     corsHeaders = {
+        # header config
         "allowOrigin": "N/A",
         "allowCreds": "N/A",
         "allowMethods": "N/A",
         "allowControl": "N/A",
         "exposeHeaders": "N/A",
-        "controlMaxAge": "N/A"
+        "controlMaxAge": "N/A",    
     }
     
     # print title and ASCII art
@@ -121,7 +172,7 @@ def main():
     send_request(tarURL, corsHeaders)
     
     # analyze response
-    analyze_repsonse(corsHeaders)
+    analyze_repsonse(tarURL, corsHeaders)
     
     # when we recieve the response from the GET request, it comes in the form of a dictionary
     # each key in the dictionary has a "definition" linked to it, I am not sure that is the correct term
