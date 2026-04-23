@@ -6,6 +6,16 @@ import logging
 import requests
 from urllib.parse import urlparse
 
+# utility functions
+
+def spacer():
+    print("=" * 59)
+    
+def title():
+    print("=" * 20 + "CORS HEADER SCANNER" + "=" * 20)
+
+# main functionality functions
+
 def get_user_url():
     functionURL = input("Enter the URL to scan for CORS misconfigurations: ")
     return functionURL
@@ -30,8 +40,7 @@ def check_user_url(url):
     
     print("URL is valid") # testing print (remove later)
     
-def send_request(url):
-    spacer = "=============================="
+def send_request(url, corsHeaders):
     # send a request to the url and get the response
     # the information returned from the reponse will be used to analyze the CORS config
     
@@ -55,36 +64,51 @@ def send_request(url):
         
     # get the response headers
     # create headers dictionary to avoid passing a million vars for each function
-
-    corsHeaders = {
-        "allowOrigin": functionResponse.headers.get("Access-Control-Allow-Origin", "N/A"),
-        "allowCreds": functionResponse.headers.get("Access-Control-Allow-Credentials", "N/A"),
-        "allowMethods": functionResponse.headers.get("Access-Control-Allow-Methods", "N/A"),
-        "allowControl": functionResponse.headers.get("Access-Control-Allow-Headers", "N/A"),
-        "exposeHeaders": functionResponse.headers.get("Access-Control-Expose-Headers", "N/A"),
-        "controlMaxAge": functionResponse.headers.get("Access-Control-Max-Age", "N/A")
-    }
     
-    print(spacer)
+    corsHeaders["allowOrigin"] = functionResponse.headers.get("Access-Control-Allow-Origin", "N/A")
+    corsHeaders["allowCreds"] = functionResponse.headers.get("Access-Control-Allow-Credentials", "N/A")
+    corsHeaders["allowMethods"] = functionResponse.headers.get("Access-Control-Allow-Methods", "N/A")
+    corsHeaders["allowControl"] = functionResponse.headers.get("Access-Control-Allow-Headers", "N/A")
+    corsHeaders["exposeHeaders"] = functionResponse.headers.get("Access-Control-Expose-Headers", "N/A")
+    corsHeaders["controlMaxAge"] = functionResponse.headers.get("Access-Control-Max-Age", "N/A")
+    
+    spacer()
     print(functionResponse.headers) # testing print (remove later)
-    print("Origin : " + corsHeaders["allowOrigin"])
-    print("Credentials : " + corsHeaders["allowCreds"])
-    print("Methods : " + corsHeaders["allowMethods"])
+    # print("Origin : " + corsHeaders["allowOrigin"])
+    # print("Credentials : " + corsHeaders["allowCreds"])
+    # print("Methods : " + corsHeaders["allowMethods"])
 
     # return the relevant headers for analysis function
     return corsHeaders
     
-def analyze_repsonse(url, allowOrigin, allowCreds):
+def analyze_repsonse(corsHeaders):
     # analyze the response headers for CORS misconfigurations
     # take the repsonse from the previous function and analyze it here
-   
-    # return everything to pass into the print function for final report
-
-    pass
     
+    spacer()
+
+    # print the juice
+    
+    print(f"{'Allow Origin':<25}: " + corsHeaders["allowOrigin"])
+    print(f"{'Allow Credentials':<25}: " + corsHeaders["allowCreds"])
+    print(f"{'Allow Methods':<25}: " + corsHeaders["allowMethods"])
+    print(f"{'Allow Control':<25}: " + corsHeaders["allowControl"])
+    print(f"{'Expose Headers':<25}: " + corsHeaders["exposeHeaders"])
+    print(f"{'Control Max Age':<25}: " + corsHeaders["controlMaxAge"])
 
 def main():
-    print("CORS Misconfiguration Scanner")
+    # define main dictionary to handle lons of variables
+    corsHeaders = {
+        "allowOrigin": "N/A",
+        "allowCreds": "N/A",
+        "allowMethods": "N/A",
+        "allowControl": "N/A",
+        "exposeHeaders": "N/A",
+        "controlMaxAge": "N/A"
+    }
+    
+    # print title and ASCII art
+    title()
     
     # get user url
     tarURL = get_user_url()
@@ -94,10 +118,10 @@ def main():
     check_user_url(tarURL)
     
     # send request
-    corsHeaders = send_request(tarURL)
+    send_request(tarURL, corsHeaders)
     
     # analyze response
-    analyze_repsonse(tarURL, corsHeaders["allowOrigin"], corsHeaders["allowCreds"],)
+    analyze_repsonse(corsHeaders)
     
     # when we recieve the response from the GET request, it comes in the form of a dictionary
     # each key in the dictionary has a "definition" linked to it, I am not sure that is the correct term
@@ -107,6 +131,7 @@ def main():
     
     
     # report results
+    
 
 
 if __name__ == "__main__":
